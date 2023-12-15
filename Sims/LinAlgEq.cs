@@ -73,6 +73,31 @@ public class LinAlgEq
         // perform Gauss elimination
         // ######## YOU MUST WRITE YOUR GAUSS ELIMINATION CODE HERE
         // ######## FIRST, GET IT WORKING WITHOUT PIVOTING
+        for (i = 0; i < n; ++i)
+    {
+        PivotRow(i);
+
+        // Normalize the current row
+        double pivot = M[i][i];
+        for (j = i; j <= n; ++j)
+        {
+            M[i][j] /= pivot;
+        }
+
+        // Eliminate other rows
+        for (k = 0; k < n; ++k)
+        {
+            if (k != i)
+            {
+                double factor = M[k][i];
+                for (j = i; j <= n; ++j)
+                {
+                    M[k][j] -= factor * M[i][j];
+                }
+            }
+        }
+    }
+        
         // ########     ONCE YOU GET IT WORKING WITHOUT PIVOTING, 
         // ########     THEN YOU CAN IMPLEMENT PIVOTING WITH ONE 
         // ########     WELL-PLACED CALL TO THE pivotRow METHOD BELOW.
@@ -80,6 +105,14 @@ public class LinAlgEq
 
         // perform back substitution
         // ######## YOU MUST WRITE YOUR BACK SUBSTITUTION CODE HERE
+    for (i = n - 1; i >= 0; --i)
+    {
+        _x[i] = M[i][n];
+        for (j = i + 1; j < n; ++j)
+        {
+            _x[i] -= M[i][j] * _x[j];
+        }
+    }
     }
 
     //--------------------------------------------------------------------
