@@ -3,6 +3,7 @@
 //       Equations of motion are derived in class notes.
 //============================================================================
 using System;
+using Godot;
 
 public class RollerRacer : Simulator
 {
@@ -55,10 +56,15 @@ public class RollerRacer : Simulator
     private void RHSFuncRRacer(double[] xx, double t, double[] ff)
     {
         // give names to some state variable so code is easier to read & write
+        double x = xx[0];
         double xDot = xx[1];
+        double z = xx[2];
         double zDot = xx[3];
         double psi  = xx[4];
         double psiDot = xx[5];
+        double thetaL = xx[6];
+        double thetaR = xx[7];
+        double thetaF = xx[8];
         double delta = xx[9];
         double deltaDot = xx[10];
 
@@ -70,20 +76,35 @@ public class RollerRacer : Simulator
         double cosPsiPlusDelta = Math.Cos(psi + delta);
         double sinPsiPlusDelta = Math.Sin(psi + delta);
 
-        // #### You will do some hefty calculations here
+        //#### You will do some hefty calculations here
+        LinAlgEq sys = new LinAlgEq(3);
+        sys.A[0][0] = sinPsi;
+        sys.A[0][1] = sinPsiPlusDelta;
+        sys.A[1][0] = cosPsi;
+        sys.A[1][1] = cosPsiPlusDelta;
+        sys.b[0] = m*x*xDot;
+        sys.b[1] = m*z*zDot;
 
-        // #### Right sides are zero for now. You will fix
-        ff[0] = 0.0;
-        ff[1] = 0.0;
-        ff[2] = 0.0;
-        ff[3] = 0.0;
-        ff[4] = 0.0;
-        ff[5] = 0.0;
-        ff[6] = 0.0;
-        ff[7] = 0.0;
-        ff[8] = 0.0;
+        sys.SolveGauss();
+
+       double Fb = sys.sol[0];
+       double Ff = sys.sol[1];
+
+
+
+        ff[0] = xDot;
+        ff[1] = (Fb*sinPsi+Ff*sinPsiPlusDelta)/m;
+        ff[2] = zDot;
+        ff[3] = (Fb * cosPsi + Ff * cosPsiPlusDelta) / m;
+        ff[4] = psiDot;
+        ff[5] = Fb * b - Ff * (h * cosDelta - d) / Ig;
+        ff[6] = (1.0 / rW) * (-xDot * cosPsi + zDot * sinPsi - c * psiDot);
+        ff[7] = (1.0 / rW) * (-xDot * cosPsi + zDot * sinPsi - c * psiDot);
+        ff[8] = (1.0 / rW) * (-xDot * cosPsiPlusDelta + zDot * sinPsiPlusDelta-h*psiDot*sinDelta);
         ff[9] = deltaDot;
         ff[10] = -kDDelta*deltaDot -kPDelta*(delta - deltaDes);
+
+        
 
         simBegun = true;
     }
