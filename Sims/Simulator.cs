@@ -10,6 +10,10 @@ public class Simulator
     protected double[] xi;     // array of intermediate states
     protected double[][] f;    // 2d array that holds values of rhs
 
+    protected double[] xA;
+    protected double[] xB;
+    protected double[] xC;
+
     protected double g;                  // gravitational field strength
     protected int subStep;     // which substep of integrator current
 
@@ -27,6 +31,9 @@ public class Simulator
         x = new double[n];
         xi = new double[n];
         f = new double[4][];
+        xA = new double[n];
+        xB = new double[n];
+        xC = new double[n];
         f[0] = new double[n];
         f[1] = new double[n];
         f[2] = new double[n];
@@ -78,11 +85,33 @@ public class Simulator
     // Step: Executes one numerical integration step using the RK4 
     //            method.
     //--------------------------------------------------------------------
-    public void Step(double time, double dTime)
+    public void StepRK4(double time, double dTime)
     {
-        //int i;
+        int i;
 
-        // It's your job to write the rest of this.
+        rhsFunc(x, time, f[0]);
+        for (i = 0; i < x.Length; ++i)
+        {
+            xA[i] = x[i] + 0.5 * f[0][i] * dTime;
+        }
+
+        rhsFunc(xA, time + 0.5 * dTime, f[1]);
+        for (i = 0; i < x.Length; ++i)
+        {
+            xB[i] = x[i] + 0.5 * f[1][i] * dTime;
+        }
+
+        rhsFunc(xB, time + 0.5 * dTime, f[2]);
+        for (i = 0; i < x.Length; ++i)
+        {
+            xC[i] = x[i] + f[2][i] * dTime;
+        }
+
+        rhsFunc(xC, time + dTime, f[3]);
+        for (i = 0; i < x.Length; ++i)
+        {
+            x[i] += (1.0 / 6.0) * (f[0][i] + 2.0 * f[1][i] + 2.0 * f[2][i] + f[3][i]) * dTime;
+        }    
     }
 
     //--------------------------------------------------------------------
